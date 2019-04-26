@@ -17,7 +17,7 @@ Once a php $_GET has been uploaded onto a victim's web server, half-shell can be
 
 Using half-shell is pretty straight forward. Enter in the url, including the location of your cmd (or otherwise) variable. If you are base64 encoding your commands (which I suggest you do) just add 'base64' to the end of the command. Other encodings are currently being looked at and could possibly be added later.
 
-![Example](https://github.com/Mr-BeardFace/Images/blob/master/halfshell1.PNG)
+![Example](https://github.com/Mr-BeardFace/Images/blob/master/halfshell2.PNG)
 
 For base64 encoded commands, the below are the best php one-liners to use. Others tend to not echo correctly, or do not return any data.
 
