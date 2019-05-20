@@ -25,6 +25,7 @@ pip install requests
 
 #### TODO List
 
+- [ ] Add error handler if domain wasn't found in Hunter.io.
 - [ ] Finish this ReadMe
 - [ ] Add a progress bar for LinkedIn searches
 - [ ] Add Google and Yahoo searches
