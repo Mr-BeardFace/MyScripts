@@ -17,8 +17,9 @@ pip install requests
 
 ## TODO List
 
+- [ ] Add a progress bar for LinkedIn searches
 - [ ] Add Google and Yahoo searches
-- [ ] Add aggressive scanner. Will scrape domain's website to pull emails and try and figure out format.
+- [ ] Add aggressive scanner, will scrape domain's website to pull emails and try and figure out format
 
 ## Known Issues
 
