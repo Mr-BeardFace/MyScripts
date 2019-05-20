@@ -298,12 +298,6 @@ if __name__ == "__main__":
     parser.add_argument("-a",metavar="api_key",help="Hunter.io API Key for pulling email format/domain. Can also be used to pull existing list")
     parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 10000)")
     parser.add_argument("-o",metavar="outfile",help="File to output results as csv")    
-    parser.add_argument("-p",metavar = "", help="Print results to screen (can be a lot)")
-        
-    args = parser.parse_args()
-    if args.o == None and args.p == None:
-        print("\nMust choose to print output to screen (-p) or write to file (-o)...")
-        sys.exit()
     
     if args.d == None:
         args.d = hunter(args.company)
@@ -314,16 +308,15 @@ if __name__ == "__main__":
     name_list = pull_names(args)
     email_list = create_emails(name_list,args.f,args.d,email_list=None)
     
+    total = len(email_list)
+    print("\nFound {} unique emails for {}\n".format(total,args.company))   
+    
     if args.o:
         print("\nWriting results to {}...".format(args.o))
         the_file = open(args.o,'a')
         for item in email_list.items():
             the_file.write('{},{}'.format(item[0],item[1]))
         the_file.close()
-    
-    total = len(email_list)
-    
-    if args.p:
-        print("\nFound {} unique emails for {}\n".format(total,args.company))
+   else:
         for item in sorted(email_list.items()):
             print('Email: {:<35}{:>30}'.format(item[0],item[1]))
