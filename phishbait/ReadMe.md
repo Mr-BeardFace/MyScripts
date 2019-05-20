@@ -20,6 +20,7 @@ pip install requests
 - [ ] Add a progress bar for LinkedIn searches
 - [ ] Add Google and Yahoo searches
 - [ ] Add aggressive scanner, will scrape domain's website to pull emails and try and figure out format
+- [ ] Add Bing API option
 
 ## Known Issues
 
