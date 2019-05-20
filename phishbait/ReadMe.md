@@ -1,7 +1,8 @@
 # Phish Bait
 
-****
+Phish Bait is meant to be used for engagements where a Phishing Campaign falls within the ROE however no emails are provided. It will use common search engines, currently just Bing but eventually Google and Yahoo as well, to identify LinkedIn accounts asociated with a target company. The names of the LinkedIn accounts will be used to create an email List for a phishing campaign. 
 
+Honestly, I decided to create this script because a friend showed me [EmailGen](https://github.com/navisecdelta/EmailGen) created by pry0cc, which I liked a lot, but thought there could be something added to make it more intuitive. Plus, I'm still new to scripting so I'm using it as practice. So if the people at NaviSec Delta see this, I hope they don't mind.
 
 ### Prerequisites
 
