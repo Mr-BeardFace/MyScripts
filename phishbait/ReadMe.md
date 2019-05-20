@@ -1,9 +1,14 @@
-# PhishBait
+# Phish Bait
 
-PhishBait
+Phish Bait
 
 ### Prerequisites
 
+Phish Bait works best with an active Hunter.io account and API key. Hunter.io is a free to use email indexing website that has indexed over 200 million emails from tens of thousands of different domains. Phish Bait uses the API key to pull down the domain and/or email format (if not provided). It also uses the results within Hunter.io to start it's email list. Visit [Hunter.io](https://hunter.io/) to set up an account.
+
+I plan on Phish Bait working with Bing API, however this is currently not set up. While this would not be needed for the program to work, it will likely be quicker and have better results than doing normal web requests.
+
+## Python Modules
 Uses python's requests and BeautifulSoup modules. 
 If you're not familiar with requests, it's more lightweight and usable compared to urllib or urllib2. More about requests can be found [here](https://2.python-requests.org//en/master/).
 
@@ -14,7 +19,7 @@ pip install bs4
 pip install requests
 ```
 
-## Additional Info
+### Additional Info
 
 ## TODO List
 
