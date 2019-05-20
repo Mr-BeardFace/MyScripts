@@ -1,5 +1,4 @@
 from argparse import RawTextHelpFormatter
-from bs4 import BeautifulSoup
 from random import choices
 from string import punctuation
 
@@ -7,9 +6,19 @@ import argparse
 import json
 import os
 import re
-import requests
 import sys
 import urllib.parse
+
+try:
+    from bs4 import BeautifulSoup
+except:
+    print('Please install BeautifulSoup before running again with "pip install bs4"...')
+    sys.exit()
+ try:
+    import requests
+except:
+    print('Please install requests before running again with "pip install requests"...')
+    sys.exit()
 
 ## I like to use random UA Strings with my requests
 def UA_pull():
