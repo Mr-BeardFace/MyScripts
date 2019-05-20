@@ -6,6 +6,7 @@ PhishBait
 
 Uses python's requests and BeautifulSoup modules. 
 If you're not familiar with requests, it's more lightweight and usable compared to urllib or urllib2. More about requests can be found [here](https://2.python-requests.org//en/master/).
+
 BeautifulSoup (bs4) is used to pull data objects out of HTML and XML files. Also has a built in parser for pulling out specific objects or can be used with other parsers. More about BeautifulSoup can be found [here](https://www.crummy.com/software/BeautifulSoup/bs4/doc/).
 
 ```
