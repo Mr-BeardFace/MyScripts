@@ -299,6 +299,8 @@ if __name__ == "__main__":
     parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 10000)")
     parser.add_argument("-o",metavar="outfile",help="File to output results as csv")    
     
+    args = parser.parse_args()
+    
     if args.d == None:
         args.d = hunter(args.company)
     
