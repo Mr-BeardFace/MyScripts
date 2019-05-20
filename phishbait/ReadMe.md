@@ -1,6 +1,7 @@
 # Phish Bait
 
-Phish Bait
+****
+
 
 ### Prerequisites
 
@@ -23,6 +24,7 @@ pip install requests
 
 ## TODO List
 
+- [ ] Finish this ReadMe
 - [ ] Add a progress bar for LinkedIn searches
 - [ ] Add Google and Yahoo searches
 - [ ] Add aggressive scanner, will scrape domain's website to pull emails and try and figure out format
