@@ -179,6 +179,12 @@ def pull_names(args):
             ## just give a blank last name
             if lastname == firstname:
                 lastname = ''
+           
+           ## Fixes a regex search error, haven't figured out why it happens yet.
+           try:
+                lastname = lastname.string
+            except:
+                pass
             
             #Update the dictionary
             linkedin_address.update({address:firstname+' '+lastname})
