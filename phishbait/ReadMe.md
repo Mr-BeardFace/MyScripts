@@ -10,7 +10,7 @@ Phish Bait works best with an active Hunter.io account and API key. Hunter.io is
 
 I plan on Phish Bait working with Bing API, however this is currently not set up. While this would not be needed for the program to work, it will likely be quicker and have better results than doing normal web requests.
 
-# Python Modules
+#### Python Modules
 Uses python's requests and BeautifulSoup modules. 
 If you're not familiar with requests, it's more lightweight and usable compared to urllib or urllib2. More about requests can be found [here](https://2.python-requests.org//en/master/).
 
@@ -23,7 +23,7 @@ pip install requests
 
 ### Additional Info
 
-# TODO List
+#### TODO List
 
 - [ ] Finish this ReadMe
 - [ ] Add a progress bar for LinkedIn searches
@@ -31,7 +31,7 @@ pip install requests
 - [ ] Add aggressive scanner, will scrape domain's website to pull emails and try and figure out format
 - [ ] Add Bing API option
 
-# Known Issues
+#### Known Issues
 
 - Doesn't work well with company names that are also common surnames (Like Smith or Allen)
 - Every so often Bing will fail to respond with full header, resulting in incorrect first/last names and email
