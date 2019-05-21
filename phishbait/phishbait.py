@@ -7,6 +7,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.parse
 
 try:
@@ -77,25 +78,39 @@ def hunter(company,domain=None,api=None):
        
         response = requests.get("https://hunter.io/v2/domain-search?limit=100&offset={}&domain={}&api_key={}&format=json".format(offset,domain,api),headers=headers).text
         data = json.loads(response)
+        
         if 'errors' in response:
             print('\nHunter.io Error: {}'.format(data['errors'][0]['details']))
             sys.exit()
-       
-        else:
-            format = data['data']['pattern']
-            print('Format: {}'.format(format))
+        
+        ## If no results were found for that domain, try to find it via Hunter.io
+        if data['meta']['results'] == 0:
+            print('\nCould not find {} within Hunter.io...'.format(domain))
+            time.sleep(3)
+            domain = hunter(company)
+            proceed = input('\nContinue with discovered domain?\n')
+            [sys.exit() if proceed.lower() != 'y' or proceed.lower() !='yes' else True]
+        
+        ## If Hunter.io already has a lot of emails, ask if user wants to proceed with Phish Bait
+        if data['meta']['results'] > 1000:
+            print("\n{} emails exist within Hunter.io...".format(data['meta']['results']))
+            proceed = input('Continue with Phish Bait anyway?\n')
+            [sys.exit() if proceed.lower() != 'y' or proceed.lower() !='yes' else True]
             
-            ## Pulling emails that are already stored in Hunter.io
-            for record in data['data']['emails']:
-                email = record['value']
-                firstname = record['first_name']
-                lastname = record['last_name']
-                try:
-                    email_list.update({email:firstname+' '+lastname})
-                except:
-                    pass
-                results = data['meta']['results']
-                offset += 100
+        format = data['data']['pattern']
+        print('Format: {}'.format(format))
+        
+        ## Pulling emails that are already stored in Hunter.io
+        for record in data['data']['emails']:
+            email = record['value']
+            firstname = record['first_name']
+            lastname = record['last_name']
+            try:
+                email_list.update({email:firstname+' '+lastname})
+            except:
+                pass
+            results = data['meta']['results']
+            offset += 100
        
         ## If there are multiple pages to pull from, iterates through
         while results >= offset:
