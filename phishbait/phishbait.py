@@ -131,9 +131,12 @@ def hunter(company,domain=None,api=None):
         return format,email_list
    
 def pull_names(args):
+    print("\nBeginning to scrape search engine for valid names...\nThis may take a while...\n")
+    
     linkedin_address = dict()
     company = args.company
     limit = args.r
+    
     if limit == None:
         limit = 10000
     ua = UA_pull()
@@ -142,6 +145,7 @@ def pull_names(args):
     start = 1
 
     while start < int(limit):
+
         content = requests.get('https://www.bing.com/search?q=site%3alinkedin.com%2fin+%22{}%22&qs=n&sp=-1&pq=site%3alinkedin.com%2fin+%22{}%22&sc=1-29&sk=&cvid=7235D443925049369236729AA53EF430&first={}&FORM=PERE'.format(company,company,start),headers=headers).content
        
         soup = BeautifulSoup(content,"html.parser")
@@ -194,9 +198,8 @@ def pull_names(args):
             ## just give a blank last name
             if lastname == firstname:
                 lastname = ''
-           
-           ## Fixes a regex search error, haven't figured out why it happens yet.
-           try:
+                
+            try:
                 lastname = lastname.string
             except:
                 pass
@@ -206,6 +209,10 @@ def pull_names(args):
         
         #Increase search results
         start += 12
+        if start < int(limit):
+            print(" [+] Bing - {} of {} completed".format(start,limit),end="\r")
+        else:
+            print(" [+] Bing - {} of {} completed".format(limit,limit),end="\r")
         
     name_list = list(filter(None,linkedin_address.values()))
 
