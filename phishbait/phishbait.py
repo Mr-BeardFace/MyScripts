@@ -1,13 +1,13 @@
 from argparse import RawTextHelpFormatter
 from random import choices
 from string import punctuation
+from time import gmtime,sleep,strftime
 
 import argparse
 import json
 import os
 import re
 import sys
-import time
 import urllib.parse
 
 try:
@@ -15,7 +15,7 @@ try:
 except:
     print('Please install BeautifulSoup before running again with "pip install bs4"...')
     sys.exit()
- try:
+try:
     import requests
 except:
     print('Please install requests before running again with "pip install requests"...')
@@ -86,7 +86,7 @@ def hunter(company,domain=None,api=None):
         ## If no results were found for that domain, try to find it via Hunter.io
         if data['meta']['results'] == 0:
             print('\nCould not find {} within Hunter.io...'.format(domain))
-            time.sleep(3)
+            sleep(3)
             domain = hunter(company)
             proceed = input('\nContinue with discovered domain?\n')
             [sys.exit() if proceed.lower() != 'y' or proceed.lower() !='yes' else True]
@@ -129,94 +129,163 @@ def hunter(company,domain=None,api=None):
                 except:
                     pass
         return format,email_list
-   
-def pull_names(args):
-    print("\nBeginning to scrape search engine for valid names...\nThis may take a while...\n")
+
+def bing_search(args):
     
     linkedin_address = dict()
-    company = args.company
+    company = args.c
     limit = args.r
     
     if limit == None:
-        limit = 10000
-    ua = UA_pull()
-    headers = {'User-Agent': ua}
-
+        limit = 1000
+    
     start = 1
-
+    
     while start < int(limit):
+        ua = UA_pull()
+        headers = {'User-Agent': ua}
+    
+        url = 'https://www.bing.com/search?q=site%3alinkedin.com%2fin+%22{}%22&qs=n&sp=-1&pq=site%3alinkedin.com%2fin+%22{}%22&sc=1-29&sk=&cvid=7235D443925049369236729AA53EF430&first={}&FORM=PERE'.format(company,company,start)
 
-        content = requests.get('https://www.bing.com/search?q=site%3alinkedin.com%2fin+%22{}%22&qs=n&sp=-1&pq=site%3alinkedin.com%2fin+%22{}%22&sc=1-29&sk=&cvid=7235D443925049369236729AA53EF430&first={}&FORM=PERE'.format(company,company,start),headers=headers).content
-       
+        content = requests.get(url,headers=headers).content
         soup = BeautifulSoup(content,"html.parser")
-        
-        ol = soup.findAll('ol')[0]
-        for li in ol.findAll('li',attrs={'class':'b_algo'}):
-            
-            ## Getting rid of bad characters
-            text = li.text.replace('\u2013','-')
-            text = text.replace('|','-')
-            text = text.replace(',','-')
-            text = text.replace('[','-')
-            
-            ## Pulling name
-            name = text.split('-')[0][:-1]
+        for li in soup.findAll(True,{'class':'b_algo'}):
             
             ## LinkedIn Address is unique, using it to rid duplicates
             for a in li.findAll('a',href=True):
                 address = a['href']
-                [linkedin_address.update({address:''}) if address not in linkedin_address.keys() else True]
+                [linkedin_address.update({address:''}) if address not in linkedin_address.keys() else True]  
             
-            ## Looking for Users whos name has Company name in it but doesn't work for Company
-            if company in name:
-                result = '-'.join(text.split('-')[1:])
-                if name in result:
-                    result = result.replace(name,'')
-                if result.count(name) == 0:
-                    break
+            firstname,lastname = pull_names(li,company)
             
-            ## If "first name" is a title, like Dr., skip it
-            name = name.split(' ')              
-            if '.' in name[0]:
-                firstname = name[1]
-            else:
-                firstname = name[0]
+            ## If result wasn't associated with company, continue
+            if firstname == None and lastname == None:
+                break            
             
-            ## First name is easy, now it's time to find the appropriate last name
-            index = -1
-            lastname = None
-            
-            ## Steps through name list, going backwards, looking for an appropriate last name
-            while lastname == None:
-                try:
-                    lastname = re.search("^[A-Za-z]+$",name[index])
-                    index -= 1
-                except:
-                    lastname = name[-1]
-            
-            ## If the first name was identified as the last name (ie, no last name was found
-            ## just give a blank last name
-            if lastname == firstname:
-                lastname = ''
-                
-            try:
-                lastname = lastname.string
-            except:
-                pass
-            
-            #Update the dictionary
             linkedin_address.update({address:firstname+' '+lastname})
-        
-        #Increase search results
+
+        #Increase search results, update progress
         start += 12
         if start < int(limit):
             print(" [+] Bing - {} of {} completed".format(start,limit),end="\r")
         else:
-            print(" [+] Bing - {} of {} completed".format(limit,limit),end="\r")
-        
-    name_list = list(filter(None,linkedin_address.values()))
+            print(" [+] Bing - {} of {} completed\n".format(limit,limit),end="\r")
 
+    name_list = list(filter(None,linkedin_address.values()))
+    return linkedin_address,name_list
+    
+def google_search(args,linkedin_address=None,name_list=None):
+    ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0'
+    headers = {'User-Agent': ua}
+    
+    jar = strftime("%Y-%m-%d-%H",gmtime())
+    cookies = {'CGIC': 'Cg1maXJlZm94LWItMS1kIj90ZXh0L2h0bWwsYXBwbGljYXRpb24veGh0bWwreG1sLGFwcGxpY2F0aW9uL3htbDtxPTAuOSwqLyo7cT0wLjg', 
+            '1P_JAR': jar, 
+            'ANID': 'AHWqTUns6P1USAcyzNABUL4HPT1AmjYa44JTgwQjUo6K4iWpGf8esmzDN2cpltf8', 
+            'SID': 'Twf-qtHfUWOw7mq0sfTw0nNaO8ChfIuViXgWQnpY0wAXKCXXXi8SAI7S9JA317EECW0cwA.', 
+            'HSID': 'AMwI_FSuQdWiDvvV9', 
+            'SSID': 'A6Ut7MX8hZRkpRKkl', 
+            'APISID': '9vtOKrPjIgWGP03-/AdK5osY6x6rzUrC3t', 
+            'SAPISID': 'DwyKMrzv5349ZZ_9/ALKsQWwB3Q6hEj5Wn', 
+            'SIDCC': 'AN0-TYsIhILGDE1Va6FKhaqcU6ZcEvGR5dsIPPbsksIZBrF0DLILbDD1Be0Y61anlbUKlvmT7p2r', 
+            'OTZ': '4916241_76_80_104160_76_446820axf0m6L0PwAAAI8dgUZBhVOQEQAAAA', 
+            'DZ': 'w5hECFNznBlcwE7ZRbY27_QvNqUBrhZEH2Srbk0ZRAEAAGCFQiytJd_b3AAAAAR-'}    
+    
+    ## If Bing search wasn't conducted, create what's needed
+    if linkedin_address == None:
+        linkedin_address = dict()
+        name_list = []
+
+    company = args.c
+    limit = args.r
+    
+    if limit == None:
+        limit = 1000
+        
+    start = 0
+    
+    while start < int(limit):
+
+        url = 'https://www.google.com/search?client=firefox-b-1-d&q=site:linkedin.com/in+"{}"&oq=site:linkedin.com/in+"{}"&start={}'.format(company,company,start)
+        
+        response = requests.get(url,headers=headers,cookies=cookies)
+        
+        content = response.content
+        soup = BeautifulSoup(content,"html.parser")
+        for g in soup.findAll(True,{'class':'g'}):
+            ## LinkedIn Address is unique, using it to rid duplicates
+            for cite in g.findAll('cite'):
+                address = cite.text
+                [linkedin_address.update({address:''}) if address not in linkedin_address.keys() else True] 
+
+            firstname,lastname = pull_names(g,company)
+            
+            if firstname == None and lastname == None:
+                break
+             
+            linkedin_address.update({address:firstname+' '+lastname})
+            
+        #Increase search results, update progress
+        start += 10
+        if start < int(limit):
+            print(" [+] Google - {} of {} completed".format(start,limit),end="\r")
+        else:
+            print(" [+] Google - {} of {} completed\n".format(limit,limit),end="\r")
+            
+    name_list = list(filter(None,linkedin_address.values()))
+    
     return name_list
+
+def pull_names(html,company):
+            
+    ## Getting rid of bad characters
+    text = html.text.replace('\u2013','-')
+    text = text.replace('|','-')
+    text = text.replace(',','-')
+    text = text.replace('[','-')
+    
+    ## Pulling name
+    name = text.split('-')[0][:-1]
+    
+    ## Looking for Users whos name has Company name in it but doesn't work for Company
+    if company in name:
+        result = '-'.join(text.split('-')[1:])
+        if name in result:
+            result = result.replace(name,'')
+        if result.count(name) == 0:
+            return None,None
+    
+    ## If "first name" is a title, like Dr., skip it
+    name = name.split(' ')              
+    if '.' in name[0]:
+        firstname = name[1]
+    else:
+        firstname = name[0]
+    
+    ## First name is easy, now it's time to find the appropriate last name
+    index = -1
+    lastname = None
+    
+    ## Steps through name list, going backwards, looking for an appropriate last name
+    while lastname == None:
+        try:
+            lastname = re.search("^[A-Za-z']+$",name[index])
+            index -= 1
+        except:
+            lastname = name[-1]
+    
+    ## If the first name was identified as the last name (ie, no last name was found
+    ## just give a blank last name
+    if lastname == firstname:
+        lastname = ''
+        
+    try:
+        lastname = lastname.string
+    except:
+        pass
+    
+    return firstname,lastname
+    
 
 def create_emails(name_list,format,domain,email_list=None):
     test = []
@@ -318,28 +387,41 @@ if __name__ == "__main__":
             " Creates emails for a phishing campaign by pulling names of LinkedIn accounts associated with \n"
             " target organization. Bing/Google is used to find LinkedIn accounts and Hunter.io is used to \n"
             " get the email format for target organization, if one is not provided.\n",
-            epilog=" Example: phishbait.py Microsoft -d microsoft.com -f {f}-{last} -r 20000 -o /home/beard/out.csv",
+            epilog=" Example: phishbait.py -c Microsoft -d microsoft.com -f {first}.{last} -r 20000 -o /home/beard/out.csv",
             formatter_class=RawTextHelpFormatter)
-    parser.add_argument("company",help="Company name of target")
+    parser.add_argument("-c",metavar="company",help="Company name of target",required=True)
     parser.add_argument("-d",metavar="domain",help="Domain name of target")
     parser.add_argument("-f",metavar="format",help="Format of email address if known. ie {f}{last}")
     parser.add_argument("-a",metavar="api_key",help="Hunter.io API Key for pulling email format/domain. Can also be used to pull existing list")
-    parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 10000)")
+    parser.add_argument("-e",metavar="search_engine",choices=("b","bing","g","google","a","all"),help="the search engine used to scrape for names: (b)ing, (g)oogle, or (a)ll")
+    parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 10000)",type=int)
     parser.add_argument("-o",metavar="outfile",help="File to output results as csv")    
     
     args = parser.parse_args()
     
+    #if args.e.lower() != 'b' or args.e.lower() != 'bing' or args.e.lower() != 'g' or args.e.lower() != 'google' or args.e.lower() != 'a' or args.e.lower() != 'all' and args.e != None:
+    #    print("\nAccepted search engines are bing, google, or all")
+    #    sys.exit()
+    
     if args.d == None:
-        args.d = hunter(args.company)
+        args.d = hunter(args.c)
     
     if args.f == None:
-        args.f,email_list = hunter(args.company,args.d,args.a)
-        
-    name_list = pull_names(args)
+        args.f,email_list = hunter(args.c,args.d,args.a)
+    
+    print("\nBeginning to scrape search engine(s) for valid names...\nThis may take a while...\n")
+    if args.e == 'b' or args.e == 'bing':
+        linkedin_address,name_list = bing_search(args)
+    if args.e == 'g' or args.e == 'google':
+        name_list = google_search(args,linkedin_address=None,name_list=None)
+    if args.e == 'a' or args.e == 'all' or args.e == None:
+        linkedin_address,name_list = bing_search(args)
+        name_list = google_search(args,linkedin_address=linkedin_address,name_list=name_list)
+    
     email_list = create_emails(name_list,args.f,args.d,email_list=None)
     
     total = len(email_list)
-    print("\nFound {} unique emails for {}\n".format(total,args.company))   
+    print("\nFound {} unique emails for {}\n".format(total,args.c))   
     
     if args.o:
         print("\nWriting results to {}...".format(args.o))
@@ -347,6 +429,6 @@ if __name__ == "__main__":
         for item in email_list.items():
             the_file.write('{},{}'.format(item[0],item[1]))
         the_file.close()
-   else:
+    else:
         for item in sorted(email_list.items()):
             print('Email: {:<35}{:>30}'.format(item[0],item[1]))
