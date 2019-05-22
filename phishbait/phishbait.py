@@ -1,13 +1,13 @@
 from argparse import RawTextHelpFormatter
 from random import choices
 from string import punctuation
-from time import gmtime,sleep,strftime
 
 import argparse
 import json
 import os
 import re
 import sys
+import time
 import urllib.parse
 
 try:
@@ -86,7 +86,7 @@ def hunter(company,domain=None,api=None):
         ## If no results were found for that domain, try to find it via Hunter.io
         if data['meta']['results'] == 0:
             print('\nCould not find {} within Hunter.io...'.format(domain))
-            sleep(3)
+            time.sleep(3)
             domain = hunter(company)
             proceed = input('\nContinue with discovered domain?\n')
             [sys.exit() if proceed.lower() != 'y' or proceed.lower() !='yes' else True]
@@ -175,21 +175,8 @@ def bing_search(args):
     return linkedin_address,name_list
     
 def google_search(args,linkedin_address=None,name_list=None):
-    ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:66.0) Gecko/20100101 Firefox/66.0'
-    headers = {'User-Agent': ua}
-    
-    jar = strftime("%Y-%m-%d-%H",gmtime())
-    cookies = {'CGIC': 'Cg1maXJlZm94LWItMS1kIj90ZXh0L2h0bWwsYXBwbGljYXRpb24veGh0bWwreG1sLGFwcGxpY2F0aW9uL3htbDtxPTAuOSwqLyo7cT0wLjg', 
-            '1P_JAR': jar, 
-            'ANID': 'AHWqTUns6P1USAcyzNABUL4HPT1AmjYa44JTgwQjUo6K4iWpGf8esmzDN2cpltf8', 
-            'SID': 'Twf-qtHfUWOw7mq0sfTw0nNaO8ChfIuViXgWQnpY0wAXKCXXXi8SAI7S9JA317EECW0cwA.', 
-            'HSID': 'AMwI_FSuQdWiDvvV9', 
-            'SSID': 'A6Ut7MX8hZRkpRKkl', 
-            'APISID': '9vtOKrPjIgWGP03-/AdK5osY6x6rzUrC3t', 
-            'SAPISID': 'DwyKMrzv5349ZZ_9/ALKsQWwB3Q6hEj5Wn', 
-            'SIDCC': 'AN0-TYsIhILGDE1Va6FKhaqcU6ZcEvGR5dsIPPbsksIZBrF0DLILbDD1Be0Y61anlbUKlvmT7p2r', 
-            'OTZ': '4916241_76_80_104160_76_446820axf0m6L0PwAAAI8dgUZBhVOQEQAAAA', 
-            'DZ': 'w5hECFNznBlcwE7ZRbY27_QvNqUBrhZEH2Srbk0ZRAEAAGCFQiytJd_b3AAAAAR-'}    
+    ua = UA_pull()
+    headers = {'User-Agent': ua}    
     
     ## If Bing search wasn't conducted, create what's needed
     if linkedin_address == None:
@@ -203,14 +190,16 @@ def google_search(args,linkedin_address=None,name_list=None):
         limit = 1000
         
     start = 0
+    num=100
     
     while start < int(limit):
-
-        url = 'https://www.google.com/search?client=firefox-b-1-d&q=site:linkedin.com/in+"{}"&oq=site:linkedin.com/in+"{}"&start={}'.format(company,company,start)
         
-        response = requests.get(url,headers=headers,cookies=cookies)
+        if (start+num) > limit:
+            num = limit-start
+            
+        url = 'https://www.google.com/search?client=firefox-b-1-d&q=site:linkedin.com/in+"{}"&oq=site:linkedin.com/in+"{}"&start={}&num={}'.format(company,company,start,num)
         
-        content = response.content
+        content = requests.get(url,headers=headers)
         soup = BeautifulSoup(content,"html.parser")
         for g in soup.findAll(True,{'class':'g'}):
             ## LinkedIn Address is unique, using it to rid duplicates
@@ -226,12 +215,69 @@ def google_search(args,linkedin_address=None,name_list=None):
             linkedin_address.update({address:firstname+' '+lastname})
             
         #Increase search results, update progress
-        start += 10
+        start += 100
         if start < int(limit):
             print(" [+] Google - {} of {} completed".format(start,limit),end="\r")
         else:
             print(" [+] Google - {} of {} completed\n".format(limit,limit),end="\r")
+        
+        ## Don't want to upset the Googles and get blocked
+        time.sleep(2)
             
+    linkedin_address,name_list = list(filter(None,linkedin_address.values()))
+    
+    return name_list
+
+def yahoo_search(args,linkedin_address=None,name_list=None):
+    ua = UA_pull()
+    headers = {'User-Agent': ua}    
+    
+    ## If Bing search wasn't conducted, create what's needed
+    if linkedin_address == None:
+        linkedin_address = dict()
+        name_list = []
+
+    company = args.c
+    limit = args.r
+    
+    if limit == None:
+        limit = 1000
+        
+    start = 1
+    num=50
+    
+    while (start-1) < int(limit):
+    
+        if (start+num) > limit:
+            num = limit-(start-1)
+            
+        url = "https://search.yahoo.com/search?p=site%3Alinkedin.com%2Fin+%22{}%22&n=100&b={}".format(company,start)
+        
+        content = requests.get(url,headers=headers).content
+        soup = BeautifulSoup(content,"html.parser")
+        for li in soup.findAll(True,{'class':'algo-sr'}):
+            ## LinkedIn Address is unique, using it to rid duplicates
+            for fz in li.findAll(True,{'class':'fz-ms'}):
+                address = fz.text
+                [linkedin_address.update({address:''}) if address not in linkedin_address.keys() else True] 
+
+            firstname,lastname = pull_names(li,company)
+            
+            if firstname == None and lastname == None:
+                break
+             
+            linkedin_address.update({address:firstname+' '+lastname})
+            
+        #Increase search results, update progress       
+        start += num
+        if start < int(limit):
+            print(" [+] Yahoo - {} of {} completed".format(start-1,limit),end="\r")
+        else:
+            print(" [+] Yahoo - {} of {} completed\n".format(limit,limit),end="\r")
+
+        ## Don't want to upset the Yahoos and get blocked
+        time.sleep(2)
+
     name_list = list(filter(None,linkedin_address.values()))
     
     return name_list
@@ -393,15 +439,11 @@ if __name__ == "__main__":
     parser.add_argument("-d",metavar="domain",help="Domain name of target")
     parser.add_argument("-f",metavar="format",help="Format of email address if known. ie {f}{last}")
     parser.add_argument("-a",metavar="api_key",help="Hunter.io API Key for pulling email format/domain. Can also be used to pull existing list")
-    parser.add_argument("-e",metavar="search_engine",choices=("b","bing","g","google","a","all"),help="the search engine used to scrape for names: (b)ing, (g)oogle, or (a)ll")
+    parser.add_argument("-e",metavar="search_engine",choices=("b","bing","g","google","y","yahoo","a","all"),help="the search engine used to scrape for names: (b)ing, (g)oogle, (y)ahoo, or (a)ll")
     parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 10000)",type=int)
     parser.add_argument("-o",metavar="outfile",help="File to output results as csv")    
     
     args = parser.parse_args()
-    
-    #if args.e.lower() != 'b' or args.e.lower() != 'bing' or args.e.lower() != 'g' or args.e.lower() != 'google' or args.e.lower() != 'a' or args.e.lower() != 'all' and args.e != None:
-    #    print("\nAccepted search engines are bing, google, or all")
-    #    sys.exit()
     
     if args.d == None:
         args.d = hunter(args.c)
@@ -413,10 +455,13 @@ if __name__ == "__main__":
     if args.e == 'b' or args.e == 'bing':
         linkedin_address,name_list = bing_search(args)
     if args.e == 'g' or args.e == 'google':
-        name_list = google_search(args,linkedin_address=None,name_list=None)
+        linkedin_address,name_list = google_search(args,linkedin_address=None,name_list=None)
+    if args.e == 'y' or args.e == 'yahoo':
+        name_list = yahoo_search(args,linkedin_address=None,name_list=None)
     if args.e == 'a' or args.e == 'all' or args.e == None:
         linkedin_address,name_list = bing_search(args)
-        name_list = google_search(args,linkedin_address=linkedin_address,name_list=name_list)
+        linkedin_address,name_list = google_search(args,linkedin_address=linkedin_address,name_list=name_list)
+        name_list = yahoo_search(args,linkedin_address=linkedin_address,name_list=name_list) 
     
     email_list = create_emails(name_list,args.f,args.d,email_list=None)
     
