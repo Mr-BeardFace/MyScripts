@@ -137,7 +137,7 @@ def bing_search(args):
     limit = args.r
     
     if limit == None:
-        limit = 1000
+        limit = 250
     
     start = 1
     
@@ -187,7 +187,7 @@ def google_search(args,linkedin_address=None,name_list=None):
     limit = args.r
     
     if limit == None:
-        limit = 1000
+        limit = 250
         
     start = 0
     num=100
@@ -241,7 +241,7 @@ def yahoo_search(args,linkedin_address=None,name_list=None):
     limit = args.r
     
     if limit == None:
-        limit = 1000
+        limit = 250
         
     start = 1
     num=50
@@ -440,7 +440,7 @@ if __name__ == "__main__":
     parser.add_argument("-f",metavar="format",help="Format of email address if known. ie {f}{last}")
     parser.add_argument("-a",metavar="api_key",help="Hunter.io API Key for pulling email format/domain. Can also be used to pull existing list")
     parser.add_argument("-e",metavar="search_engine",choices=("b","bing","g","google","y","yahoo","a","all"),help="the search engine used to scrape for names: (b)ing, (g)oogle, (y)ahoo, or (a)ll")
-    parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 10000)",type=int)
+    parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 250)",type=int)
     parser.add_argument("-o",metavar="outfile",help="File to output results as csv")    
     
     args = parser.parse_args()
