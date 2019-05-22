@@ -36,3 +36,4 @@ pip install requests
 
 - Doesn't work well with company names that are also common surnames (Like Smith or Allen)
 - Every so often Bing will fail to respond with full header, resulting in incorrect first/last names and email
+- Both Yahoo and Google don't like a lot of autmoated searches, so there is a possibility of returning an error... still working through the best way around it
