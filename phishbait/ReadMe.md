@@ -27,10 +27,10 @@ pip install requests
 
 - [X] Add error handler if domain wasn't found in Hunter.io.
 - [X] Add a progress bar for LinkedIn searches
+- [X] Add Google and Yahoo searches
 - [ ] Finish this ReadMe
-- [ ] Add Google and Yahoo searches
 - [ ] Add aggressive scanner, will scrape domain's website to pull emails and try and figure out format
-- [ ] Add Bing API option
+- [ ] Add Bing and Google API option
 
 #### Known Issues
 
