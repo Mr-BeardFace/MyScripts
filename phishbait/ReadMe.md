@@ -2,7 +2,7 @@
 
 Phish Bait is meant to be used for engagements where a Phishing Campaign falls within the ROE however no emails are provided. It will use common search engines to identify LinkedIn accounts asociated with a target company. The names of the LinkedIn accounts will be used to create an email list for the campaign. 
 
-Honestly, I decided to create this script because a friend showed me [EmailGen](https://github.com/navisecdelta/EmailGen) created by @pry0cc, which I liked a lot, but thought there could be something added to make it more intuitive. Plus, I'm still new to scripting so I'm using it as practice. So if the people at NaviSec Delta see this, I hope they don't mind.
+Honestly, I decided to create this script because a friend showed me [EmailGen](https://github.com/navisecdelta/EmailGen) created by pry0cc, which I liked a lot, but thought there could be something added to make it more intuitive. Plus, I'm still new to scripting so I'm using it as practice. So if the people at NaviSec Delta see this, I hope they don't mind.
 
 ### Prerequisites
 
@@ -37,3 +37,5 @@ pip install requests
 - Doesn't work well with company names that are also common surnames (Like Smith or Allen)
 - Every so often Bing will fail to respond with full header, resulting in incorrect first/last names and email
 - Both Yahoo and Google don't like a lot of automated searches, so there is a possibility of returning an error... still working through the best way around it
+
+test @Mr-BeardFace
