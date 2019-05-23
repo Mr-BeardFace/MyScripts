@@ -363,7 +363,7 @@ def create_emails(name_list,format,domain,email_list=None):
         
         firstname = names[0]
         lastname = names[1]       
-       
+        
         ## If first name is first
         if 'f' in indexing[0]:
             
@@ -418,6 +418,18 @@ def create_emails(name_list,format,domain,email_list=None):
         email_list.update({email.lower():firstname+' '+lastname})
 
     return email_list
+
+def to_screen(email_list):
+    for item in sorted(email_list.items()):
+        print('Email: {:<35}{:>30}'.format(item[0],item[1]))
+        
+def to_file(file, email_list):
+    print("Writing results to {}...".format(args.o))
+
+    the_file = open(file,'a')
+    for item in email_list.items():
+        the_file.write('{},{}\n'.format(item[0],item[1]))
+    the_file.close()
 
 if __name__ == "__main__":
     try:
@@ -479,12 +491,26 @@ if __name__ == "__main__":
     total = len(email_list)
     print("\nFound {} unique emails for {}\n".format(total,args.c))   
     
-    if args.o:
-        print("\nWriting results to {}...".format(args.o))
-        the_file = open(args.o,'a')
-        for item in email_list.items():
-            the_file.write('{},{}'.format(item[0],item[1]))
-        the_file.close()
+    if args.o == None:
+        to_screen(email_list)
+    
+    if os.path.isfile(args.o):
+        answer = ''
+        valid = ['a','append','y','yes','n','no','q','quit','e','exit']
+        
+        while answer.lower() not in valid:
+            answer = input("File {} already exists, overwrite file? (y)es, (n)o, or (a)ppend\n".format(args.o))
+            
+        if answer.lower() in valid[:2]:
+            to_file(args.o, email_list)
+        
+        elif answer.lower() in valid[2:4]:
+            print("\nReplacing old file with new list...")
+            os.remove(args.o)
+            to_file(args.o, email_list)
+            
+        else:
+            to_screen(email_list)
+            
     else:
-        for item in sorted(email_list.items()):
-            print('Email: {:<35}{:>30}'.format(item[0],item[1]))
+        to_file(args.o,email_list)
