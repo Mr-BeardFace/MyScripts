@@ -421,7 +421,7 @@ def create_emails(name_list,format,domain,email_list=None):
 
 def to_screen(email_list):
     for item in sorted(email_list.items()):
-        print('Email: {:<35}{:>30}'.format(item[0],item[1]))
+        print(' {:<35}{:>30}'.format(item[0],item[1]))
         
 def to_file(file, email_list):
     print("Writing results to {}...".format(args.o))
