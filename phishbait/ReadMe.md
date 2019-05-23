@@ -29,6 +29,7 @@ pip install requests
 - [X] Add a progress bar for LinkedIn searches
 - [X] Add Google and Yahoo searches
 - [ ] Finish this ReadMe
+- [ ] Change the requirement to either company or domain, not just company
 - [ ] Add aggressive scanner, will scrape domain's website to pull emails and try and figure out format
 - [ ] Add Bing and Google API option
 
