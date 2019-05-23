@@ -153,7 +153,11 @@ def bing_search(args):
             
             ## LinkedIn Address is unique, using it to rid duplicates
             for a in li.findAll('a',href=True):
-                address = a['href']
+                address = a['href'][8:]
+                                
+                ## Removing trailing '/' if present
+                address = [address[:-1] if address[-1] == '/' else address][0]
+                
                 [linkedin_address.update({address:''}) if address not in linkedin_address.keys() else True]  
             
             firstname,lastname = pull_names(li,company)
@@ -199,12 +203,15 @@ def google_search(args,linkedin_address=None,name_list=None):
             
         url = 'https://www.google.com/search?client=firefox-b-1-d&q=site:linkedin.com/in+"{}"&oq=site:linkedin.com/in+"{}"&start={}&num={}'.format(company,company,start,num)
         
-        content = requests.get(url,headers=headers)
+        content = requests.get(url,headers=headers).content
         soup = BeautifulSoup(content,"html.parser")
         for g in soup.findAll(True,{'class':'g'}):
             ## LinkedIn Address is unique, using it to rid duplicates
             for cite in g.findAll('cite'):
-                address = cite.text
+                address = cite.text[8:]
+                
+                ## Removing trailing '/' if present
+                address = [address[:-1] if address[-1] == '/' else address][0]
                 [linkedin_address.update({address:''}) if address not in linkedin_address.keys() else True] 
 
             firstname,lastname = pull_names(g,company)
@@ -224,9 +231,9 @@ def google_search(args,linkedin_address=None,name_list=None):
         ## Don't want to upset the Googles and get blocked
         time.sleep(2)
             
-    linkedin_address,name_list = list(filter(None,linkedin_address.values()))
+    name_list = list(filter(None,linkedin_address.values()))
     
-    return name_list
+    return linkedin_address,name_list
 
 def yahoo_search(args,linkedin_address=None,name_list=None):
     ua = UA_pull()
@@ -258,7 +265,11 @@ def yahoo_search(args,linkedin_address=None,name_list=None):
         for li in soup.findAll(True,{'class':'algo-sr'}):
             ## LinkedIn Address is unique, using it to rid duplicates
             for fz in li.findAll(True,{'class':'fz-ms'}):
-                address = fz.text
+                address = fz.text               
+                                
+                ## Removing trailing '/' if present
+                address = [address[:-1] if address[-1] == '/' else address][0]
+                
                 [linkedin_address.update({address:''}) if address not in linkedin_address.keys() else True] 
 
             firstname,lastname = pull_names(li,company)
@@ -277,7 +288,7 @@ def yahoo_search(args,linkedin_address=None,name_list=None):
 
         ## Don't want to upset the Yahoos and get blocked
         time.sleep(2)
-
+    
     name_list = list(filter(None,linkedin_address.values()))
     
     return name_list
@@ -440,8 +451,8 @@ if __name__ == "__main__":
     parser.add_argument("-f",metavar="format",help="Format of email address if known. ie {f}{last}")
     parser.add_argument("-a",metavar="api_key",help="Hunter.io API Key for pulling email format/domain. Can also be used to pull existing list")
     parser.add_argument("-e",metavar="search_engine",choices=("b","bing","g","google","y","yahoo","a","all"),help="the search engine used to scrape for names: (b)ing, (g)oogle, (y)ahoo, or (a)ll")
-    parser.add_argument("-r",metavar="results",help="Number of results to search through per search engine (default is 250)",type=int)
-    parser.add_argument("-o",metavar="outfile",help="File to output results, outputs as csv")    
+    parser.add_argument("-r",metavar="results",help="Number of Bing results to search through (default is 250)",type=int)
+    parser.add_argument("-o",metavar="outfile",help="File to output results as csv")    
     
     args = parser.parse_args()
     
