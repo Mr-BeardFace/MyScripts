@@ -1,35 +1,36 @@
 **Not my script! Proper credit goes to Jake Miller (https://github.com/laconicwolf)**
 
-Nmap-XML-Parser
 
+# Nmap-Parser
 Converts Nmap XML output to csv file, and other useful functions. Ignores hosts that are down and ports that are not open.
-Usage
-Convert Nmap output to csv file
 
-python3 nmap_xml_parser.py -f nmap_scan.xml -csv nmap_scan.csv
-Display scan information to the terminal
+## Usage
 
-python3 nmap_xml_parser.py -f nmap_scan.xml -p
-Display only IP addresses
+### Convert Nmap output to csv file
+`python3 nmap_parser.py -f nmap_scan.xml -csv nmap_scan.csv`
 
-python3 nmap_xml_parser.py -f nmap_scan.xml -ip
-Display IP addresses/ports in URL friendly format
+### Display scan information to the terminal
+`python3 nmap_parser.py -f nmap_scan.xml -p`
 
-    Displays in format http(s)://ipaddr:port if port is a possible web port
+### Display only IP addresses
+`python3 nmap_parser.py -f nmap_scan.xml -ip`
 
-python3 nmap_xml_parser.py -f nmap_scan.xml -pw
-Display least common open ports
+### Display IP addresses/ports in URL friendly format
+> Displays in format http(s)://ipaddr:port if port is a possible web port
 
-    Displays the 10 least common open ports
+`python3 nmap_parser.py -f nmap_scan.xml -pw`
 
-python3 nmap_xml_parser.py -f nmap_scan.xml -lc 10
-Display most common open ports
+### Display least common open ports
+> Displays the 10 least common open ports
 
-    Displays the 10 most common open ports
+`python3 nmap_parser.py -f nmap_scan.xml -lc 10`
 
-python3 nmap_xml_parser.py -f nmap_scan.xml -mc 10
-Display only IP addresses with a specified open port
+### Display most common open ports
+> Displays the 10 most common open ports
 
-    Displays only IP addresses where port 23 is open
+`python3 nmap_parser.py -f nmap_scan.xml -mc 10`
 
-python3 nmap_xml_parser.py -f nmap_scan.xml -fp 23
+### Display only IP addresses with a specified open port
+> Displays only IP addresses where port 23 is open
+
+`python3 nmap_parser.py -f nmap_scan.xml -fp 23`
