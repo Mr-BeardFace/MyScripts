@@ -75,7 +75,9 @@ def save_poster(poster_content, output_path):
         print(f"Error saving poster to {output_path}: {e}")
         return False
 
-def handle_movie(poster_id):
+def handle_single(poster_id):
+    global type
+    
     try:
         int(poster_id)
     except ValueError:
@@ -86,34 +88,25 @@ def handle_movie(poster_id):
     poster_content, filename, ext = fetch_poster(url_poster)
     
     if poster_content and filename and ext:
-        movie = filename.split(f".{ext}")[0]
-        tmdb_id = get_tmdb(movie, 'movie')
-        if tmdb_id:
-            save_path = f"assets/movies/{filename}"
-            saved = save_poster(poster_content, save_path)
-            if saved:
-                print(f"  #{movie}\n  {tmdb_id}:\n    file_poster: \"config/assets/movies/{filename}\"")
-
-def handle_season(poster_id):
-    try:
-        int(poster_id)
-    except ValueError:
-        print(f"Invalid poster ID: {poster_id}")
-        return
-    
-    url_poster = f"https://theposterdb.com/api/assets/{poster_id}/view"
-    poster_content, filename, ext = fetch_poster(url_poster)
-    
-    if poster_content and filename and ext:
-        show_title = filename.split(' - Season')[0]
-        tvdb_id = get_tmdb(show_title, 'tv')
-        num = re.findall(r'\d+', filename)[-1]
-        if tvdb_id:
-            num2 = "%02d" % (int(num),)
-            save_path = f"assets/tv_shows/{show_title}_Season{num2}.{ext}"
-            saved = save_poster(poster_content, save_path)
-            if saved:
-                print(f"      {num}:\n        file_poster: \"config/assets/tv_shows/{show_title}_Season{num2}.{ext}\"")
+        if type == "movie":
+            movie = filename.split(f".{ext}")[0]
+            tmdb_id = get_tmdb(movie, 'movie')
+            if tmdb_id:
+                save_path = f"assets/movies/{filename}"
+                saved = save_poster(poster_content, save_path)
+                if saved:
+                    print(f"  #{movie}\n  {tmdb_id}:\n    file_poster: \"config/assets/movies/{filename}\"")
+        
+        if type == "season":
+            show_title = filename.split(' - Season')[0]
+            tvdb_id = get_tmdb(show_title, 'tv')
+            num = re.findall(r'\d+', filename)[-1]
+            if tvdb_id:
+                num2 = "%02d" % (int(num),)
+                save_path = f"assets/tv_shows/{show_title}_Season{num2}.{ext}"
+                saved = save_poster(poster_content, save_path)
+                if saved:
+                    print(f"      {num}:\n        file_poster: \"config/assets/tv_shows/{show_title}_Season{num2}.{ext}\"")
 
 def handle_set(poster_id):
     global type
@@ -234,11 +227,11 @@ def get_pics(poster_id=None):
     global type
 
     handlers = {
-        'movie': handle_movie,
-        'season': handle_season,
+        'movie': handle_single,
+        'season': handle_single,
         'set': handle_set,
-        'show': handle_show,
         'collection': handle_set,
+        'show': handle_show,
     }
 
     if poster_id is None:
@@ -264,7 +257,7 @@ if __name__ == "__main__":
     type = args.type
 
     if not type:
-        print('Type must be "movie" or "show" or "set" or "collection" exactly...')
+        print('Type must be "movie" or "episode" or "show" or "set" or "collection" exactly...')
         help()
     else:
         get_pics(args.id)
