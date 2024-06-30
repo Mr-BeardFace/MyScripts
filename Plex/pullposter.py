@@ -29,7 +29,7 @@ def get_tmdb(title, category):
     title = ' '.join(title.split(' ')[:-1])
     url = f'https://api.themoviedb.org/3/search/{category}?query={title}&include_adult=false&language=en-US&page=1&year={year}'
     ua = choice(UAS)
-    auth_key = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIzNmZkNTVmODEyMzliNDQ0ODFjZmM3Y2FlMjE2MTVhMSIsInN1YiI6IjY0NTEwYmE1ZTE2ZTVhMDBlMzJiYWU0OCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Bd6QYNUWj5TkStMBzHGXIDpbBiYljhQAeu7qqs-kF2I'
+    auth_key = <auth_key>
     headers = {'User-Agent': ua, 'Authorization': f'Bearer {auth_key}', 'Accept': 'application/json'}
 
     try:
