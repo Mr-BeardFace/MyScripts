@@ -195,6 +195,7 @@ def handle_show(poster_id):
             show_title = show_title.split(' - Season')[0]
         tmdb_id = get_tmdb(show_title, 'tv')
 
+        show_org = {}
         for show, url_poster in tpdb_set.items():
             poster_content, filename, ext = fetch_poster(url_poster)
             if poster_content and filename and ext:
@@ -204,17 +205,19 @@ def handle_show(poster_id):
                     num = re.findall(r'\d+', show)[-1]
                 else:
                     num = '-1'
-                if num == '-1':
-                    save_path = f"assets/tv_shows/{filename}"
-                    saved = save_poster(poster_content, save_path)
-                    if saved:
-                        print(f"  #{show_title}\n  {tmdb_id}:\n    #reference: https://theposterdb.com/set/{poster_id}\n    file_poster: \"config/assets/tv_shows/{filename}\"")
-                elif int(num) == 1:
-                    num2 = "%02d" % (int(num),)
-                    save_path = f"assets/tv_shows/{show_title}_Season{num2}.{ext}"
-                    saved = save_poster(poster_content, save_path)
-                    if saved:
-                        print(f"    seasons:\n      {num}:\n        file_poster: \"config/assets/tv_shows/{show_title}_Season{num2}.{ext}\"")
+                show_org[num] = [filename, poster_content, ext]
+
+        for num in sorted(show_org.keys()):
+            filename = show_org[num][0]
+            poster_content = show_org[num][1]
+            ext = show_org[num][2]
+                
+            if num == '-1':
+                save_path = f"assets/tv_shows/{filename}"
+                saved = save_poster(poster_content, save_path)
+                if saved:
+                    print(f"  #{show_title}\n  {tmdb_id}:\n    #reference: https://theposterdb.com/set/{poster_id}\n    file_poster: \"config/assets/tv_shows/{filename}\"")
+                    print(f"    seasons:")
                 else:
                     num2 = "%02d" % (int(num),)
                     save_path = f"assets/tv_shows/{show_title}_Season{num2}.{ext}"
