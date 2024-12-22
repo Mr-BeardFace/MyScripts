@@ -90,12 +90,15 @@ def handle_single(poster_id):
     if poster_content and filename and ext:
         if type == "movie":
             movie = filename.split(f".{ext}")[0]
-            tmdb_id = get_tmdb(movie, 'movie')
-            if tmdb_id:
-                save_path = f"assets/movies/{filename}"
-                saved = save_poster(poster_content, save_path)
-                if saved:
-                    print(f"  #{movie}\n  {tmdb_id}:\n    file_poster: \"config/assets/movies/{filename}\"")
+            if movie.endswith("Collection"):
+                handle_collection(poster_content, filename, ext)
+            else:
+                tmdb_id = get_tmdb(movie, 'movie')
+                if tmdb_id:
+                    save_path = f"assets/movies/{filename}"
+                    saved = save_poster(poster_content, save_path)
+                    if saved:
+                        print(f"  #{movie}\n  {tmdb_id}:\n    file_poster: \"config/assets/movies/{filename}\"")
         
         if type == "season":
             show_title = filename.split(' - Season')[0]
@@ -157,10 +160,11 @@ def handle_set(poster_id):
 
 def handle_collection(poster_content, filename, ext):
     collection = filename.split(f".{ext}")[0]
+    collection = ' '.join(collection.split(' ')[:-1])
     save_path = f"assets/collections/{filename}"
     saved = save_poster(poster_content, save_path)
     if saved:
-        print(f"  \"{collection}\":\n    file_poster: \"config/assets/collections/{filename}\"")
+        print(f"  {collection}:\n    file_poster: \"config/assets/collections/{filename}\"")
 
 def handle_show(poster_id):
     try:
@@ -232,6 +236,7 @@ def get_pics(poster_id=None):
         'set': handle_set,
         'collection': handle_set,
         'show': handle_show,
+        'collection poster': handle_single,
     }
 
     if poster_id is None:
@@ -247,8 +252,8 @@ if __name__ == "__main__":
         prog="PosterPull",
         description="Retrieves and saves posters from ThePosterDB based on ID"
     )
-    parser.add_argument('type', choices=['movie', 'season', 'set', 'show', 'collection'],
-                        help='Type of poster to retrieve: movie, set, show, collection')
+    parser.add_argument('type', choices=['movie', 'season', 'set', 'show', 'collection', 'collection poster'],
+                        help='Type of poster to retrieve: movie, set, show, collection, collection poster')
     parser.add_argument('-i', '--id', type=str, help='ID of the poster set')
 
     args = parser.parse_args()
