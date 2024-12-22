@@ -252,7 +252,7 @@ def get_pics(poster_id=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="PosterPull",
+        prog="PullPoster",
         description="Retrieves and saves posters from ThePosterDB based on ID"
     )
     parser.add_argument('type', choices=['movie', 'season', 'set', 'show', 'collection', 'collection poster'],
