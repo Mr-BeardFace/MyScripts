@@ -46,7 +46,7 @@ python xp_jobshell.py -s <server> -u <username> -p <password> --pid <process_id>
 - `-u, --username`: Username for authentication
 - `-p, --password`: Password for authentication
 - `-d, --database`: Database to use (default: master)
-- `-c, --command`: **PowerShell command to execute** (PowerShell cmdlets only, not external executables)
+- `-c, --command`: Command to execute** (PowerShell cmdlets only when using impersonation)
 - `--pid`: Process ID to steal token from (optional, requires local admin on SQL host)
 - `--port`: SQL Server port (default: 1433)
 
