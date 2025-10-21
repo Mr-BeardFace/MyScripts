@@ -42,7 +42,7 @@ python xp_jobshell.py -s <server> -u <username> -p <password> --pid <process_id>
 
 ### Parameters
 
-- `-s, --server`: MSSQL Server (IP or hostname)
+- `-s, --server`: MSSQL Server (IP or hostname, use server:port for non 1433 ports)
 - `-u, --username`: Username for authentication
 - `-p, --password`: Password for authentication
 - `-d, --database`: Database to use (default: master)
