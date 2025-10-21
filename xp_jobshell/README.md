@@ -89,7 +89,7 @@ When using the `--pid` flag, the tool:
 
 ### Important Limitations
 
-**PowerShell Cmdlets Only:**
+**PowerShell Cmdlets Only with Token Impersonation:**
 - ✓ Works: `Get-Process`, `Get-ChildItem`, `Get-ADUser`, `[System.Security.Principal.WindowsIdentity]::GetCurrent().Name`
 - ✗ Doesn't work: `whoami.exe`, `net.exe`, `cmd.exe` (external executables spawn new processes that lose impersonation)
 
