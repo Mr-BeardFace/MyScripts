@@ -33,7 +33,7 @@ The core methodology uses:
 
 2. **Obscure API Usage**: Uses `RegQueryMultipleValuesW` instead of the commonly monitored `RegQueryValueExW`. EDR vendors focus on high-frequency APIs and have overlooked this rarer interface.
 
-3. **No Disk Artifacts**: Reads directly from registry memory using NTAPI paths (`\Registry\Machine\SAM\...`). No `reg save` commands, no Volume Shadow Copy (VSS), no files written to disk during extraction.
+3. **No Intermediate Files**: Reads directly from registry memory using NTAPI paths (`\Registry\Machine\SAM\...`). Unlike traditional methods that use `reg save` or Volume Shadow Copy to create intermediate hive files, this tool extracts values directly from memory and only writes the final output files (bootkey, F.bin, V_*.bin).
 
 4. **Legitimate Backup Semantics**: Uses Windows' own backup/restore mechanism (`REG_OPTION_BACKUP_RESTORE`) which is a legitimate administrative function, making it harder to flag as malicious.
 
@@ -103,14 +103,15 @@ This tool is designed to evade detection by:
 
 1. **No suspicious process execution** - Pure registry API calls
 2. **No LSASS interaction** - Avoids heavily monitored process
-3. **No suspicious file operations** - No `reg save`, no VSS creation
+3. **No intermediate hive files** - No `reg save`, no VSS creation, reads directly from memory
 4. **Legitimate Windows APIs** - Uses documented backup/restore functions
-5. **Memory-only reads** - Registry values read directly from memory
+5. **Direct registry access** - NTAPI calls to read values from memory, not disk
 
 **Note:** While this technique bypasses many EDR solutions, it may still be detected by:
 - Advanced behavior analytics
 - SeBackupPrivilege usage monitoring
 - Custom detection rules targeting registry access patterns
+- File creation monitoring (output files are still written)
 
 ## Technical Details
 
