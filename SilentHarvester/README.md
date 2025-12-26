@@ -9,7 +9,7 @@ This tool is based on the technique described in the blog post **"Silent Harvest
 The core methodology uses:
 - `NtOpenKeyEx` with `REG_OPTION_BACKUP_RESTORE` flag to bypass ACLs
 - `RegQueryMultipleValuesW` (a rarely monitored API) to read registry values
-- Direct memory access to avoid disk artifacts
+- Direct memory access to avoid reg specific disk artifacts
 
 ## Table of Contents
 
