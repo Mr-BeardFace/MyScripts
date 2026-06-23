@@ -1,5 +1,7 @@
 # Silent Harvester
 
+**CURRENTLY HAS A KNOWN ISSUE - HAVEN'T HAD TIME TO WORK IT OUT YET**
+
 A stealthy Windows credential extraction tool that bypasses modern EDR solutions by leveraging overlooked Windows APIs and legitimate backup/restore mechanisms.
 
 ## Credit
